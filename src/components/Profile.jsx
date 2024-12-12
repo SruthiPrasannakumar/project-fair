@@ -2,16 +2,17 @@ import React,{useEffect, useState} from 'react'
 import { Collapse } from 'react-bootstrap'
 import uploadImg from '../assets/uploadImg.png'
 import SERVER_BASE_URL from '../services/serverUrl';
+import { updateUserAPI } from '../services/allAPI';
 const Profile = () => {
     const [open, setOpen] = useState(false);
     const [preview,setPreview]=useState("")
     const [existingProfilePic,setExisitingProfilePic]=useState("")
-    // 
+    // profilePic key of userDetails is used to store uploaded user profile pic file
     const [userDetails,setUserDetails]=useState({
       username:"",email:"",password:"",github:"",linkedin:"",profilePic:""
     })
     console.log(userDetails); 
-    // 
+    // get existing user details from session and store it to userDetails state
     useEffect(()=>{
       if(sessionStorage.getItem("user")){
         const user=JSON.parse(sessionStorage.getItem("user"))
@@ -35,7 +36,7 @@ const Profile = () => {
 
 
     const handleUserUpdate=async()=>{
-      // get user details
+      // get all user details
       const {username,email,password,github,linkedin,profilePic}=userDetails
       // if text field have value
       if(github && linkedin){
@@ -55,6 +56,22 @@ const Profile = () => {
             "Authorization":`Bearer ${token}`
           }
           // make api call
+          try{
+            const result=await updateUserAPI(reqBody,reqHeader)
+            if(result.status==200){
+              // alert 
+              alert("User profile updated successfully!!!")
+              // store update user in sesion
+              sessionStorage.setItem("user",JSON.stringify(result.data))
+              // collapse profile
+              setOpen(!open)
+            }
+
+          }catch(err){
+            console.log(err);
+            
+
+          }
         }
       }else{
         alert("please fill the form completely!!")
@@ -82,14 +99,14 @@ const Profile = () => {
             }
             </label>
 
-         <div className="mb-2 w-100">
-            <input value={userDetails.github} onChange={e=>userDetails({...userDetails,github:e.target.value})} type="text" placeholder='User GITHUB Link' className='form-control' />
+         <div className="my-2 w-100">
+            <input value={userDetails.github} onChange={e=>setUserDetails({...userDetails,github:e.target.value})} type="text" placeholder='User GITHUB Link' className='form-control' />
          </div>
          <div className="mb-2 w-100">
-            <input  value={userDetails.linkedin} onChange={e=>userDetails({...userDetails,linkedin:e.target.value})} type="text" placeholder='User LINKEDIN Link' className='form-control' />
+            <input  value={userDetails.linkedin} onChange={e=>setUserDetails({...userDetails,linkedin:e.target.value})} type="text" placeholder='User LINKEDIN Link' className='form-control' />
          </div>
          <div className="d-grid w-100">
-            <button className='btn btn-warning'>Update</button>
+            <button onClick={handleUserUpdate} className='btn btn-warning'>Update</button>
          </div>
         </div>
       </Collapse>

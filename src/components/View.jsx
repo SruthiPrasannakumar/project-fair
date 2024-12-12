@@ -39,6 +39,8 @@ const  View = () => {
     }
   }
 
+  // display the array in jsx
+
   const removeProject=async(id)=>{
     const token =sessionStorage.getItem("token")
     if(token){
